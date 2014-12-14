@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# /etc/ports/drivers/git: git driver script for ports(8)
+# 
+
+if [ $# -ne 1 ]; then
+	echo "usage: $0 <file>" >&2
+	exit 1
+fi
+
+. $1
+
+if [ -z "$URL" ]; then
+	echo "URL not set in '$1'" >&2
+	exit 2
+fi
+if [ -z "$NAME" ]; then
+	echo "NAME not set in '$1'" >&2
+	exit 2
+fi
+
+if [ -d "$PORTS_DIR/$NAME" ]; then
+	cd "$PORTS_DIR/$NAME"
+	echo "Fetching ports from $URL"
+	git fetch -q --depth 1; git reset -q --hard origin/$BRANCH
+else
+	echo "Cloning ports from $URL"
+	git clone -q --depth 1 "$URL" "$PORTS_DIR/$NAME"
+	cd "$PORTS_DIR/$NAME"; git checkout -q "$BRANCH"
+fi
+
+echo "Finished successfully"
