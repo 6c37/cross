@@ -1,5 +1,4 @@
 # Collection kori, by kori at openmailbox dot org
 
 NAME=kori
-URL=git://github.com/kori/cross/
-BRANCH=ports
+URL=git://github.com/kori/crux-ports
