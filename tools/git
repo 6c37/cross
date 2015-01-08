@@ -21,7 +21,7 @@ fi
 
 if cd "$PORTS_DIR/$NAME"; then
 	echo "Fetching ports from $URL"
-	git fetch && git reset --hard origin/master
+	git fetch -q && git reset --hard origin/master
 else
 	echo "Cloning ports from $URL"
 	git clone "$URL" "$PORTS_DIR/$NAME"
