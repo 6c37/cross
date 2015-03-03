@@ -1,4 +1,3 @@
-
 #!/bin/sh
 #
 # /etc/ports/drivers/git: git driver script for ports(8)
