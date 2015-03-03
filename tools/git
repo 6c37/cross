@@ -1,3 +1,4 @@
+
 #!/bin/sh
 #
 # /etc/ports/drivers/git: git driver script for ports(8)
@@ -19,11 +20,13 @@ if [ -z "$NAME" ]; then
 	exit 2
 fi
 
+echo "Updating collection $NAME"
+
 if cd "$PORTS_DIR/$NAME"; then
-	echo "Fetching ports from $URL"
-	git fetch -q && git reset --hard origin/master
+	git fetch -q
+	git whatchanged -n 1 | grep "^:" | cut -d " " -f 5- | sort | uniq | sed "s/M\t/ Edit /g; s/A\t/ Add /g; s/D\t/ Delete /g"
+	git reset -q --hard origin/master
 else
-	echo "Cloning ports from $URL"
 	git clone "$URL" "$PORTS_DIR/$NAME"
 fi
 
