@@ -19,11 +19,14 @@ if [ -z "$NAME" ]; then
 	exit 2
 fi
 
+echo "Fetching updates from $URL"
+echo "Updating collection $NAME"
+
 if cd "$PORTS_DIR/$NAME"; then
-	echo "Fetching ports from $URL"
-	git fetch -q && git reset --hard origin/master
+	git fetch -q
+	git diff --pretty=format: --name-status master origin/master | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g"
+	git reset -q --hard origin/master
 else
-	echo "Cloning ports from $URL"
 	git clone "$URL" "$PORTS_DIR/$NAME"
 fi
 
