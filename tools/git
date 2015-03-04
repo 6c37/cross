@@ -23,7 +23,7 @@ echo "Updating collection $NAME"
 
 if cd "$PORTS_DIR/$NAME"; then
 	git fetch -q
-	git whatchanged -n 1 | grep "^:" | cut -d " " -f 5- | sort | uniq | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g"
+	git diff --pretty=format: --name-status master origin/master | sed "s/M\t/ Edit /g; s/A\t/ Add /g; s/D\t/ Delete /g"
 	git reset -q --hard origin/master
 else
 	git clone "$URL" "$PORTS_DIR/$NAME"
