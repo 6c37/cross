@@ -22,12 +22,15 @@ fi
 echo "Fetching updates from $URL"
 echo "Updating collection $NAME"
 
-if cd "$PORTS_DIR/$NAME"; then
+cd "$PORTS_DIR/$NAME" 2> "/dev/null"
+
+if [ $? -lt 1 ]; then
 	git fetch -q
 	git diff --pretty=format: --name-status $BRANCH origin/$BRANCH | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g"
 	git reset -q --hard origin/$BRANCH
 else
-	git clone "$URL" "$PORTS_DIR/$NAME"
+	echo " Initial git clone, this may take a while"
+	git clone -q "$URL" "$PORTS_DIR/$NAME"
 fi
 
 echo "Finished successfully"
