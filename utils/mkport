@@ -34,8 +34,6 @@ done
 
 read -p "URL: " url
 
-#echo -e "${brown}Dependencies should be separated but a space."
-#echo -e "${brown}Don't list dependencies that are in core.$foreground"
 if [[ "$version" == git ]]; then
 	while read -p "Depends on: git " deps; do
 		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
@@ -60,8 +58,8 @@ else
 	echo "# Description: $description" > "Pkgfile"
 fi
 echo "# URL:         $url" >> "Pkgfile"
-echo "# Packager:    onodera, onodera at openmailbox dot org" >> "Pkgfile"
-echo "# Maintainer:  onodera, onodera at openmailbox dot org" >> "Pkgfile"
+echo "# Packager:    TODO" >> "Pkgfile"
+echo "# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports/issues" >> "Pkgfile"
 if [[ "$version" == git ]]; then
 	echo "# Depends on:  git $deps" >> "Pkgfile"
 else
