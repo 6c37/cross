@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# onodera - onodera at openmailbox dot org
+# Creates a port template
+
+foreground="\e[0;39m"
+brown="\e[1;33m"
+
+read -p "Name: " name
+echo -e "${brown}Enter \"git\" here if your package gets pulled from git.$foreground"
+read -p "Version: " version
+if [[ "$version" == git ]]; then
+	read -p "Git source: " gitsource
+else
+	read -p "Source: " source
+fi
+echo -e "${brown}All description should start with a capital letter and end with a dot.$foreground"
+echo -e "${brown}Git package, \"- git checkout\" will be automatically added to the description.$foreground"
+read -p "Description: " description
+read -p "URL: " url
+echo -e "${brown}Dependencies should be separated but a space."
+echo -e "${brown}Don't list dependencies that are in core.$foreground$foreground"
+if [[ "$version" == git ]]; then
+	read -p "Depends on: git " deps
+else
+	read -p "Depends on: " deps
+fi
+
+if [[ "$version" == git ]]; then
+	echo "# Description: $description - git checkout" > "Pkgfile"
+else
+	echo "# Description: $description" > "Pkgfile"
+fi
+echo "# URL:         $url" >> "Pkgfile"
+echo "# Packager:    onodera, onodera at openmailbox dot org" >> "Pkgfile"
+echo "# Maintainer:  onodera, onodera at openmailbox dot org" >> "Pkgfile"
+if [[ "$version" == git ]]; then
+	echo "# Depends on:  git $deps" >> "Pkgfile"
+else
+	echo "# Depends on:  $deps" >> "Pkgfile"
+fi
+echo "" >> "Pkgfile"
+echo "name=$name" >> "Pkgfile"
+echo "version=$version" >> "Pkgfile"
+echo "release=1" >> "Pkgfile"
+echo "source=($source)" >> "Pkgfile"
+echo "" >> "Pkgfile"
+echo "build() {" >> "Pkgfile"
+if [[ "$version" == git ]]; then
+	echo "	cd \$PKGMK_SOURCE_DIR" >> "Pkgfile"
+	echo "" >> "Pkgfile"
+	echo "	if cd \$name; then" >> "Pkgfile"
+	echo "		git fetch -q; git reset --hard origin/master" >> "Pkgfile"
+	echo "	else" >> "Pkgfile"
+	echo "		git clone $gitsource \$name" >> "Pkgfile"
+	echo "		cd \$name" >> "Pkgfile"
+	echo "	fi" >> "Pkgfile"
+else
+	echo "	cd \$name-\$version" >> "Pkgfile"
+fi
+echo "" >> "Pkgfile"
+echo "	# Replace me!" >> "Pkgfile"
+echo "}" >> "Pkgfile"
