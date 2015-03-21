@@ -23,7 +23,9 @@ fi
 #echo -e "${brown}Git package, \"- git checkout\" will be automatically added to the description.$foreground"
 while read -p "Description: " description; do
 	if [[ -z "$(echo "$description" | grep -o "^[A-Z]")" ]]; then
-		echo -e "${brown}All descriptions should start with a capital letter.$foreground"
+		echo -e "${brown}All descriptions should start with a capital letter, try again.$foreground"
+	elif [[ -z "$(echo "$description" | grep -o "\.$")" ]]; then
+		echo -e "${brown}All descriptions should end with a period, try again.$foreground"
 	else
 		break
 	fi
