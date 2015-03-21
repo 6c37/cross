@@ -3,6 +3,9 @@
 # onodera - onodera at openmailbox dot org
 # Creates a port template
 
+# TODO: Add an option to disable the help messages.
+# TODO: Make the reads return an error when something is wrong, fore example a Description without a capital letter.
+
 foreground="\e[0;39m"
 brown="\e[1;33m"
 
@@ -19,7 +22,7 @@ echo -e "${brown}Git package, \"- git checkout\" will be automatically added to 
 read -p "Description: " description
 read -p "URL: " url
 echo -e "${brown}Dependencies should be separated but a space."
-echo -e "${brown}Don't list dependencies that are in core.$foreground$foreground"
+echo -e "${brown}Don't list dependencies that are in core.$foreground"
 if [[ "$version" == git ]]; then
 	read -p "Depends on: git " deps
 else
