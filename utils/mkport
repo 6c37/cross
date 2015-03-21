@@ -40,12 +40,16 @@ if [[ "$version" == git ]]; then
 	while read -p "Depends on: git " deps; do
 		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
 			echo -e "${brown}Dependencies should only be separated but a space, try again.$foreground"
+		else
+			break
 		fi
 	done
 else
 	while read -p "Depends on: " deps; do
 		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
 			echo -e "${brown}Dependencies should only be separated but a space, try again.$foreground"
+		else
+			break
 		fi
 	done
 fi
