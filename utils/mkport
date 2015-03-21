@@ -37,7 +37,7 @@ read -p "URL: " url
 if [[ "$version" == git ]]; then
 	while read -p "Depends on: git " deps; do
 		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
-			echo -e "${brown}Dependencies should only be separated but a space, try again.$foreground"
+			echo -e "${brown}Dependencies should only be separated by a space, try again.$foreground"
 		else
 			break
 		fi
@@ -45,7 +45,7 @@ if [[ "$version" == git ]]; then
 else
 	while read -p "Depends on: " deps; do
 		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
-			echo -e "${brown}Dependencies should only be separated but a space, try again.$foreground"
+			echo -e "${brown}Dependencies should only be separated by a space, try again.$foreground"
 		else
 			break
 		fi
