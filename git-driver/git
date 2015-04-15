@@ -26,7 +26,7 @@ cd "$PORTS_DIR/$NAME" 2> "/dev/null"
 
 if [ $? -lt 1 ]; then
 	git fetch -q
-	git diff --pretty=format: --name-status $BRANCH origin/$BRANCH | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g"
+	git diff --pretty=format: --name-status $BRANCH origin/$BRANCH | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g" | sort
 	git clean -q -f
 	git reset -q --hard origin/$BRANCH
 else
