@@ -25,13 +25,14 @@ echo "Updating collection $NAME"
 cd "$PORTS_DIR/$NAME" 2> "/dev/null"
 
 if [ $? -lt 1 ]; then
+	git checkout -q "$BRANCH"
 	git fetch -q
-	git diff --pretty=format: --name-status $BRANCH origin/$BRANCH | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g" | sort
+	git diff --pretty=format: --name-status "$BRANCH" origin/"$BRANCH" | sed "s/M\t/ Edit /g; s/A\t/ Checkout /g; s/D\t/ Delete /g" | sort
 	git clean -q -f
-	git reset -q --hard origin/$BRANCH
+	git reset -q --hard origin/"$BRANCH"
 else
 	echo " Initial git clone, this may take a while"
-	git clone -q "$URL" "$PORTS_DIR/$NAME"
+	git clone -q -b "$BRANCH" "$URL" "$PORTS_DIR/$NAME"
 fi
 
 echo "Finished successfully"
