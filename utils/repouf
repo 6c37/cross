@@ -14,4 +14,9 @@ for dir in $(ls); do
 	if [ $? -ge 1 ]; then
 		exit 1
 	fi
+
+	git add .
+	git commit -m "$dir: Update footprint."
+	# TODO: Figure out how to auto enter username/password
+	git push
 done
