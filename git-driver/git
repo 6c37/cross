@@ -18,6 +18,10 @@ if [ -z "$NAME" ]; then
 	echo "NAME not set in '$1'" >&2
 	exit 2
 fi
+if [ -z "$BRANCH" ]; then
+	echo "BRANCH not set in '$1'" >&2
+	exit 2
+fi
 
 echo "Fetching updates from $URL"
 echo "Updating collection $NAME"
