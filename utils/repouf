@@ -8,6 +8,7 @@ repo=$PWD
 for dir in $(ls); do
 	cd $repo/$dir
 
+	# TODO: Install dependencies too?
 	pkgmk
 	pkgmk -uf
 
@@ -17,6 +18,7 @@ for dir in $(ls); do
 
 	git add .
 	git commit -m "$dir: Update footprint."
-	# TODO: Figure out how to auto enter username/password
-	git push
+
 done
+
+git push
