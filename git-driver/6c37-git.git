@@ -2,4 +2,4 @@
 
 NAME=6c37-git
 URL=git://github.com/6c37/crux-ports-git
-BRANCH=master
+BRANCH=3.2
