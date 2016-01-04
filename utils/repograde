@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# wildefyr - 2015 (c) wtfpl
+# update git packages if commit(s) are merged
+
+usage() {
+    printf '%s\n' "usage: $(basename $0) <repository>"
+    exit 1
+}
+
+gitPortsUsage() {
+    printf '%s\n' "$REPOSITORY/.gitports does not exist or is empty." >&2 
+    printf '%s\n' "Please create a file naming the ports you wish to update." >&2 
+    exit 1
+}
+
+PORTSDIR=${PORTSDIR:-/usr/ports}
+SOURCEDIR=${SOURCEDIR:-$(cat /etc/pkgmk.conf | grep SOURCE | cut -d\" -f 2)}
+
+test -z $1 && usage
+REPOSITORY=$1
+test -d $PORTSDIR/$REPOSITORY || usage
+REPOSITORY="$PORTSDIR/$REPOSITORY"
+test -f $REPOSITORY/.gitports || gitPortsUsage
+PORTNUM=$(cat $REPOSITORY/.gitports | wc -l)
+test $PORTNUM -eq 0 && gitPortsUsage
+
+for COUNTER in $(seq $PORTNUM); do
+    PORT=$(cat $REPOSITORY/.gitports | sed "$COUNTER!d" | cut -d\  -f 1)
+    # COMMIT=$(cat $REPOSITORY/.gitports | sed "$COUNTER!d" | cut -d\  -f 2)
+    cd $SOURCEDIR/$PORT
+    git pull
+    # post merge hook ??
+    # Add $PACKAGE to $PACKAGELIST if merge was succesful
+done
+
+if [ ! -z $PACKAGELIST ]; then
+    for PACKAGE in $PACKAGELIST; do
+        prt-get update -fr $PACKAGE
+        repouf $PACKAGE
+    done
+fi 
