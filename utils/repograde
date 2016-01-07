@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# wildefyr - 2015 (c) wtfpl
+# wildefyr - 2016 (c) wtfpl
 # update git packages if commit(s) are merged
 
 usage() {
@@ -26,6 +26,7 @@ REPOSITORY=$1
 test -d $PORTSDIR/$REPOSITORY || usage
 REPOSITORY="$PORTSDIR/$REPOSITORY"
 test -f $REPOSITORY/.gitports || gitPortsUsage
+# TODO: check each package for 'version=git' and 'checkout= / git checkout '
 PORTNUM=$(cat $REPOSITORY/.gitports | wc -l)
 test $PORTNUM -eq 0 && gitPortsUsage
 
@@ -37,8 +38,10 @@ for COUNTER in $(seq $PORTNUM); do
         cd $SOURCEDIR/$PORT
 
         # add a post-merge script to the git repo
+        # TODO: check $PACKAGELIST and if not equal to current $PACKAGELIST,
+        # update the post-merge hook
         if [ ! -f ./.git/hooks/post-merge ]; then
-            printf '%s\n' "Adding post-merge script"
+            printf '%s\n' "Adding post-merge script for $PORT."
             cat > ./.git/hooks/post-merge << EOTEMPLATE
 #!/bin/sh
 #
@@ -47,7 +50,6 @@ for COUNTER in $(seq $PORTNUM); do
 printf '%s' "$PORT" >> $PACKAGELIST
 EOTEMPLATE
             chmod +x ./.git/hooks/post-merge
-            # TODO: clone the repository if not found
         fi
 
         printf '%s\n' "$PORT:"
@@ -56,6 +58,7 @@ EOTEMPLATE
         if [ "$PORT" != "$COMMIT" ]; then
             git checkout $COMMIT
         fi
+        # TODO: clone the repository if not found
 	fi
 
 done
@@ -65,9 +68,48 @@ if [ -f $PACKAGELIST ]; then
         PACKAGE=$(cat $PACKAGELIST | sed "$COUNTER!d")
 
         cd $REPOSITORY/$PACKAGE
-        pkgmk -f
-        pkgmk -uf
-        # TODO: if $PACKAGE/.footprint has been updated, git add, git commit
-        # and toggle git push boolean
+
+        PACKAGEINSTALLED=0
+        while [ $PACKAGEINSTALLED -eq 0 ]; do
+            pkgmk -f
+
+            # if md5sum is mismatched, update md5sum
+            if [ $? -eq 6 ]; then
+                pkgmk -um
+                if [ $? -gt 1 ]; then
+                    continue
+                fi
+
+                git add .
+                git commit -m "$PACKAGE: Update md5sum."
+                if [ -z $GITPUSH ]; then
+                    GITPUSH=1                    
+                fi
+            # if footprint is mismatched, update footprint
+            elif [ $? -eq 7 ]; then
+                pkgmk -uf
+                if [ $? -gt 1 ]; then
+                    continue
+                fi
+
+                git add .
+                git commit -m "$PACKAGE: Update footprint."
+                if [ -z $GITPUSH ]; then
+                    GITPUSH=1                    
+                fi
+
+                # install updated package with new footprint
+                pkgmk 
+                if [ $? -eq 0 ]; then
+                    PACKAGEINSTALLED=1
+                fi
+            fi
+        done
     done
+    
+    if [ ! -z $GITPUSH ]; then
+        cd $REPOSITORY
+        printf '%s\n' "Pushing new $REPOSITORY updates:"
+        git push
+    fi
 fi 
