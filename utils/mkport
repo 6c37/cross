@@ -6,8 +6,8 @@
 # creates a port template
 
 ARGS="$@"
-DEFAULT=""
-PACKAGER=""
+DEFAULT="wild-crux-ports"
+PACKAGER="wildefyr, wildefur at gmail dot com"
 PORTSDIR=${PORTSDIR:-/usr/ports}
 
 usage() {
@@ -95,11 +95,8 @@ getPortInfo() {
         done
         printf '%s' "Branch: "; while read -r branch; do
             test -z "$branch" && {
-                color "Branch cannot be empty."
-                printf '%s' "Branch: "
-                continue
+                branch="master"
             }
-            break
         done
     } || {
         printf '%s' "Source: "; while read -r source; do
@@ -182,7 +179,7 @@ cd \$PKGMK_SOURCE_DIR
 ${TAB}${TAB}if cd \$name; then
 ${TAB}${TAB}${TAB}git fetch -q; git reset --hard origin/\$branch
 ${TAB}${TAB}else
-${TAB}${TAB}${TAB}git clone $gitsource -b \$branch \$name
+${TAB}${TAB}${TAB}git clone $gitsource -b $branch \$name
 ${TAB}${TAB}${TAB}cd \$name
 ${TAB}${TAB}fi
 GIT
@@ -207,7 +204,6 @@ name=$name
 version=$version
 release=1
 source=($source)
-$(test "$version" = "git" && printf '%s' "branch=$branch")
 
 build() {
 ${TAB}$(cdpkg)
