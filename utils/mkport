@@ -56,7 +56,7 @@ createPort() {
                     buildVerify
                     exit
                 }
-            } 
+            }
         } || {
             rm -rf $name
             mkdir $name
@@ -86,7 +86,7 @@ getPortInfo() {
                 printf '%s' "Git Source: "
                 continue
             }
-            test "$(echo "$gitsource" | grep -E '(https?|git|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]')" || {
+            test "$(echo "$gitsource" | grep -E '(https?|git)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]')" || {
                 color "Git Source does not have a valid URL."
                 printf '%s' "Git Source: "
                 continue
@@ -164,6 +164,16 @@ getPortInfo() {
     }
 }
 
+maintainerHeader() {
+    test "$maintainer" = "yes" && {
+        test "$version" = "git" && {
+            printf '%s' "# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports-git/issues"
+        } || {
+            printf '%s' "# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports/issues"
+        }
+    }
+}
+
 cdpkg() {
     test "$version" = "git" && {
     cat << GIT
@@ -190,7 +200,7 @@ createPkgfile() {
 # Description: $description
 # URL:         $url
 # Packager:    $PACKAGER
-$(test "$maintainer" = "yes" && printf '%s' "# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports/issues")
+$(maintainerHeader)
 # Depends on:$deps
 
 name=$name
