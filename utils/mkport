@@ -1,97 +1,254 @@
-#!/bin/bash
+#!/bin/sh
 #
 # onodera - onodera at openmailbox dot org
 # refactored by arianon - arianon at openmailbox dot org
-# Creates a port template
+# further refactoring by wildefyr - wildefur at gmail dot com
+# creates a port template
 
-# TODO: Force people to use prtverify somehow.
+ARGS="$@"
+DEFAULT=""
+PACKAGER=""
+PORTSDIR=${PORTSDIR:-/usr/ports}
+
+usage() {
+    cat << USAGE
+Usage: $(basename $0) [name] [directory]
+USAGE
+
+    test -z $1 || exit $1
+}
 
 color() {
-	foreground="\e[0;39m"
-	brown="\e[1;33m"
-	
-	echo -e "${brown}$@${foreground}"
+    f0='[30m'; f1='[31m'; f2='[32m'; f3='[33m'
+    f4='[34m'; f5='[35m'; f6='[36m'; f7='[37m'
+    b0='[40m'; b1='[41m'; b2='[42m'; b4='[44m'
+    b4='[44m'; b5='[45m'; b6='[46m'; b7='[47m'
+    B='[1m'; R='[0m'; I='[7m'
+
+    cat << COLOR
+$f0$B$I$b6>$I$b7 $@ $I$b7$R
+COLOR
 }
 
-read -p "Name: " name
+createPort() {
+    test -d $PORTSDIR/$directory && {
+        cd $PORTSDIR/$directory
+        test -d $name && {
+            test -f $name/Pkgfile && {
+                # test for vimcat for colour output
+                type vimcat 2>&1 > /dev/null && {
+                    vimcat $PORTSDIR/$directory/$name/Pkgfile
+                } || {
+                    cat $PORTSDIR/$directory/$name/Pkgfile
+                }
 
-# color "Enter \"git\" here if your package gets pulled from git."
-read -p "Version: " version
+                printf '%s' "Edit Pkgfile? [Y/n]: "; read -r edit
+                test "$edit" = "n" && {
+                    printf '%s' "Delete Port? [N/y]: "; read -r delete
+                    test "$delete" = "y" && {
+                        sudo rm -r $PORTSDIR/$directory/$name
+                    } || {
+                        printf '%s\n' "Exiting..."
+                    }
+                    exit
+                } || {
+                    prt-get edit $name
+                    buildVerify
+                    exit
+                }
+            } 
+        } || {
+            rm -rf $name
+            mkdir $name
+        }
+        cd $name
+    } || {
+        printf '%s\n' "Not a valid directory."
+        exit 1
+    }
+}
 
-if [[ "$version" == git ]]; then
-	read -p "Git: " gitsource
-	read -p "Branch: " branch
-else
-	read -p "Source: " source
-fi
+getPortInfo() {
+    color "Enter 'git' to add a git source."
+    printf '%s' "Version: "; while read -r version; do
+        test -z "$version" && {
+            color "Version cannot be empty."
+            printf '%s' "Version: "
+            continue
+        }
+        break
+    done
 
-echo ""
+    test "$version" = "git" && {
+        printf '%s' "Git Source: "; while read -r gitsource; do
+            test -z "$gitsource" && {
+                color "Git Source cannot be empty."
+                printf '%s' "Git Source: "
+                continue
+            }
+            test "$(echo "$gitsource" | grep -E '(https?|git|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]')" || {
+                color "Git Source does not have a valid URL."
+                printf '%s' "Git Source: "
+                continue
+            }
+            break
+        done
+        printf '%s' "Branch: "; while read -r branch; do
+            test -z "$branch" && {
+                color "Branch cannot be empty."
+                printf '%s' "Branch: "
+                continue
+            }
+            break
+        done
+    } || {
+        printf '%s' "Source: "; while read -r source; do
+            test -z "$source" && {
+                color "Source cannot be empty."
+                printf '%s' "Source: "
+                continue
+            }
+            break
+        done
+    }
 
-# color "Git package, \"- git checkout\" will be automatically added to the description."
-while read -p "Description: " description; do
-	if [[ -z "$(echo "$description" | grep -o "^[A-Z]")" && -z "$(echo "$description" | grep -o "\.$")" ]]; then
-		color "Descriptions should start with a capital letter and end with a period, try again."
-	elif [[ -z "$(echo "$description" | grep -o "^[A-Z]")" ]]; then
-		color "Descriptions should start with a capital letter, try again."
-	elif [[ -z "$(echo "$description" | grep -o "\.$")" ]]; then
-		color "Descriptions should end with a period, try again."
-	else
-		break
-	fi
-done
+    printf '%s' "Description: "; while read -r description; do
+        test -z "$description" && {
+            color "Description cannot be empty."
+            printf '%s' "Description: "
+            continue
+        }
+        test -z "$(echo "$description" | grep -o "^[A-Z]")" && {
+            color "Descriptions should start with a capital letter."
+            printf '%s' "Description: "
+            continue
+        }
+        test -z "$(echo "$description" | grep -o "\.$")" && {
+            color "Descriptions should end with a period."
+            printf '%s' "Description: "
+            continue
+        }
+        break
+    done
 
-read -p "URL: " url
+    test "$version" = "git" && description="$description (git checkout)"
 
-if [[ "$version" == git ]]; then
-	while read -p "Depends on: git " deps; do
-		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
-			color "Dependencies should only be separated by a space, try again."
-		else
-			break
-		fi
-	done
-else
-	while read -p "Depends on: " deps; do
-		if [[ -n "$(echo "$deps" | grep -o ",")" ]]; then
-			color "Dependencies should only be separated but a space, try again."
-		else
-			break
-		fi
-	done
-fi
+    printf '%s' "URL: "; while read -r url; do
+        test -z "$url" && {
+            color "URL cannot be empty."
+            printf '%s' "URL: "
+            continue
+        }
+        test "$(echo "$url" | grep -E '(https?|git|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]')" || {
+            color "URL is not valid."
+            printf '%s' "URL: "
+            continue
+        }
+        break
+    done
+
+    printf '%s' "Depends on: "; while read -r deps; do
+        test -n "$(echo "$deps" | grep -o ",")" && {
+            color "Dependencies should only be separated by a space."
+            printf '%s' "Dependencies: "
+            continue
+        }
+        break
+    done
+
+    test "$version" = "git" && deps="  git $deps" || deps="  $deps"
+
+    printf '%s' "Include 6c37 header? [Y/n]: "; read -r sixcthreeseven
+    test "$sixcthreeseven" != "n" && {
+        maintainer="yes"
+    }
+}
 
 cdpkg() {
-	if [[ $version == "git" ]]; then
-	cat <<GIT
-	cd \$PKGMK_SOURCE_DIR
+    test "$version" = "git" && {
+    cat << GIT
+cd \$PKGMK_SOURCE_DIR
 
-	if cd \$name; then
-		git fetch -q; git reset --hard origin/$branch
-	else
-		git clone $gitsource -b $branch \$name
-		cd \$name
-	fi
+${TAB}${TAB}if cd \$name; then
+${TAB}${TAB}${TAB}git fetch -q; git reset --hard origin/\$branch
+${TAB}${TAB}else
+${TAB}${TAB}${TAB}git clone $gitsource -b \$branch \$name
+${TAB}${TAB}${TAB}cd \$name
+${TAB}${TAB}fi
 GIT
-	else
-		echo "cd \$name-\$version"
-	fi
+    } || {
+    cat << TARBALL
+cd \$name-\$version
+TARBALL
+    }
 }
 
-cat > "Pkgfile" << EOTEMPLATE
+createPkgfile() {
+    TAB="$(printf '\t')"
+
+    cat > "Pkgfile" << EOTEMPLATE
 # Description: $description
 # URL:         $url
-# Packager:    Name and email go here.
-# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports/issues
-# Depends on:  $deps
+# Packager:    $PACKAGER
+$(test "$maintainer" = "yes" && printf '%s' "# Maintainer:  6c37 Team, https://github.com/6c37/crux-ports/issues")
+# Depends on:$deps
 
 name=$name
 version=$version
 release=1
 source=($source)
+$(test "$version" = "git" && printf '%s' "branch=$branch")
 
 build() {
-	$(cdpkg)
+${TAB}$(cdpkg)
 
-	# Build instructions go here.
 }
+# vim: set ft=sh noet :
 EOTEMPLATE
+}
+
+buildVerify() {
+    printf '%s' "Build package now? [Y/n]: "; read -r confirm
+    test "$confirm" != "n" && {
+        test "$(prt-get listinst | grep $name)" = "$name" && {
+            sudo prt-get update $name -fr
+        } || {
+            sudo prt-get depinst $name
+        }
+        prtverify $PORTSDIR/$directory/$name
+    }
+}
+
+main() {
+    # take first arg as name
+    case $1 in
+        h|-h|help|--help) usage 0 ;;
+        *)
+            test ! -z $1 && {
+                name=$1
+            } || {
+                printf '%s' "Name: "; read -r name
+            }
+    esac
+
+    # take second arg as port repo
+    test ! -z $2 && {
+        directory=$2
+    } || {
+        test ! -z $DEFAULT && {
+            directory=$DEFAULT
+        } || {
+            find $PORTSDIR -maxdepth 1 -type d | cut -d/ -f 4 | sort
+            printf '\n%s' "Directory: "; read -r directory
+        }
+    }
+
+    createPort
+    getPortInfo
+    createPkgfile
+    prt-get cache
+    prt-get edit $name
+    buildVerify
+}
+
+main $ARGS
