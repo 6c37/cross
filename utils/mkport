@@ -93,6 +93,7 @@ getPortInfo() {
             }
             break
         done
+        color "Leave blank for 'master' branch."
         printf '%s' "Branch: "; while read -r branch; do
             test -z "$branch" && {
                 branch="master"
