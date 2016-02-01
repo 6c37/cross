@@ -93,11 +93,13 @@ getPortInfo() {
             }
             break
         done
+
         color "Leave blank for 'master' branch."
         printf '%s' "Branch: "; while read -r branch; do
             test -z "$branch" && {
                 branch="master"
             }
+            break
         done
     } || {
         printf '%s' "Source: "; while read -r source; do
@@ -173,16 +175,18 @@ maintainerHeader() {
 }
 
 cdpkg() {
+    TAB="$(printf '\t')"
+
     test "$version" = "git" && {
     cat << GIT
-cd \$PKGMK_SOURCE_DIR
+${TAB}cd \$PKGMK_SOURCE_DIR
 
-${TAB}${TAB}if cd \$name; then
-${TAB}${TAB}${TAB}git fetch -q; git reset --hard origin/\$branch
-${TAB}${TAB}else
-${TAB}${TAB}${TAB}git clone $gitsource -b $branch \$name
-${TAB}${TAB}${TAB}cd \$name
-${TAB}${TAB}fi
+${TAB}if cd \$name; then
+${TAB}${TAB}git fetch -q; git reset --hard origin/\$branch
+${TAB}else
+${TAB}${TAB}git clone $gitsource -b \$branch \$name
+${TAB}${TAB}cd \$name
+${TAB}fi
 GIT
     } || {
     cat << TARBALL
@@ -192,8 +196,6 @@ TARBALL
 }
 
 createPkgfile() {
-    TAB="$(printf '\t')"
-
     cat > "Pkgfile" << EOTEMPLATE
 # Description: $description
 # URL:         $url
@@ -205,9 +207,10 @@ name=$name
 version=$version
 release=1
 source=($source)
+$(test "$version" = "git" && printf '%s' "branch=$branch")
 
 build() {
-${TAB}$(cdpkg)
+$(cdpkg)
 
 }
 # vim: set ft=sh noet :
