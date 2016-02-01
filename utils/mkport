@@ -190,7 +190,7 @@ ${TAB}fi
 GIT
     } || {
     cat << TARBALL
-cd \$name-\$version
+${TAB}cd \$name-\$version
 TARBALL
     }
 }
