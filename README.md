@@ -1,6 +1,6 @@
-# Cross 
+# Cross
 
-This repo contains some CRUX related files and utils.
+This repository contains CRUX related files and utils.
 
 The files should be pretty self explanatory.
 
