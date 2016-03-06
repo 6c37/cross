@@ -1,0 +1,8 @@
+#
+# /etc/ports/6c37.httpup: 6c37 ports collection
+#
+
+ROOT_DIR=/usr/ports/6c37
+URL=https://raw.githubusercontent.com/6c37/crux-ports/master/
+
+# End of file
