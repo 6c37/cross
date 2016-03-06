@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# maintainer: wildefyr, me at wildefyr dot net
+# run httpup-repgen before commit
+
+type crux 2>&1 > /dev/null && {
+    httpup-repgen
+    git add REPO
+}
