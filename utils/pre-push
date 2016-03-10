@@ -1,0 +1,7 @@
+#!/bin/sh
+
+type httpup-repgen 2>&1 > /dev/null && {
+    httpup-repgen
+    git add REPO
+    git commit -m 'Update: REPO'
+}
