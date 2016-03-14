@@ -1,0 +1,20 @@
+#!/bin/sh
+
+REMOTEURL="https://github.com/6c37"
+PORTDIR="${PORTDIR:-$HOME}"
+PORTS="\
+crux-ports
+crux-ports-git"
+
+test ! -d "${PORTDIR}" && mkdir -p "${PORTDIR}"
+
+printf '%s\n' "$PORTS" | while read -r PORT; do
+    cd "${PORTDIR}"
+    test ! -d "${PORTDIR}/${PORT}" && git clone "${REMOTEURL}/${PORT}"
+    cd "${PORT}"
+
+    httpup-repgen
+    git add REPO
+    git commit -m 'Update: REPO'
+    git push
+done
