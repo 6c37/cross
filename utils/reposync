@@ -14,8 +14,12 @@ printf '%s\n' "$PORTS" | while read -r PORT; do
         git clone "${REMOTEURL}/${PORT}"
         git remote set-url origin git@github.com:6c37/${PORT}.git
     }
+
     cd "${PORT}"
+    git pull
 
     httpup-repgen
-    git add REPO && git commit -m 'Update: REPO' && git push origin master
+
+    git add REPO && git commit -m 'Update: REPO' 
+    git push
 done
