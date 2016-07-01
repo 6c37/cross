@@ -35,7 +35,7 @@ if [ $? -lt 1 ]; then
 	git clean -q -f
 	git reset -q --hard origin/"$BRANCH"
 else
-	git clone -q -b "$BRANCH" "$URL" "$PORTS_DIR/$NAME"
+	git clone -q --depth 1 -b "$BRANCH" "$URL" "$PORTS_DIR/$NAME"
 	ls /usr/ports/$NAME | sed "s/^/ Checkout /g"
 fi
 
