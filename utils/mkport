@@ -6,8 +6,7 @@
 # creates a port template
 
 ARGS="$@"
-DEFAULT="wild-crux-ports"
-PACKAGER="wildefyr, wildefur at gmail dot com"
+DEFAULT="crux-ports"
 PORTSDIR=${PORTSDIR:-/usr/ports}
 
 usage() {
@@ -199,7 +198,6 @@ createPkgfile() {
     cat > "Pkgfile" << EOTEMPLATE
 # Description: $description
 # URL:         $url
-# Packager:    $PACKAGER
 $(maintainerHeader)
 # Depends on:$deps
 
