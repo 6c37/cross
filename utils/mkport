@@ -45,7 +45,7 @@ createPort() {
                 test "$edit" = "n" && {
                     printf '%s' "Delete Port? [N/y]: "; read -r delete
                     test "$delete" = "y" && {
-                        sudo rm -r $PORTSDIR/$directory/$name
+                        rm -rf $PORTSDIR/$directory/$name
                     } || {
                         printf '%s\n' "Exiting..."
                     }
