@@ -20,6 +20,9 @@ if [ -n "$1" ]; then
 
 		# update package
 		up) sudo pkgadd -u $2;;
+		
+		# force package update
+		fup) sudo pkgadd -u -f $2;;
 
 		# list which package owns which file
 		which) pkginfo -o $2 ;;
@@ -27,12 +30,12 @@ if [ -n "$1" ]; then
 		# error
 		*)
 			echo "Invalid command."
-			echo "Usage: pkg [add|files|force|ls|rm|up|which] [package]"
+			echo "Usage: pkg [add|files|force|ls|rm|up|fup|which] [package]"
 			exit 1
 		;;
 	esac
 else
 	echo "No command provided."
-	echo "Usage: pkg [add|files|force|ls|rm|up|which] [package]"
+	echo "Usage: pkg [add|files|force|ls|rm|up|fup|which] [package]"
 	exit 1
 fi
