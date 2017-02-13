@@ -2,4 +2,4 @@
 
 NAME=xorg
 URL=git://crux.nu/ports/xorg
-BRANCH=3.2
+BRANCH=3.3
