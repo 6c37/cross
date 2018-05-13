@@ -2,4 +2,4 @@
 
 NAME=core
 URL=git://crux.nu/ports/core
-BRANCH=3.3
+BRANCH=3.4

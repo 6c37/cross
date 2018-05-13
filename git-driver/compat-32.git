@@ -2,4 +2,4 @@
 
 NAME=compat-32
 URL=git://crux.nu/ports/compat-32
-BRANCH=3.3
+BRANCH=3.4
